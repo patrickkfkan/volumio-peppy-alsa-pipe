@@ -1,0 +1,64 @@
+{
+  "page": {
+    "label": "TRANSLATE.PEPPY_ALSA_PIPE"
+  },
+  "sections": [
+    {
+      "id": "section_status",
+      "element": "section",
+      "label": "TRANSLATE.PEPPY_ALSA_PIPE_STATUS",
+      "icon": "fa-info-circle",
+      "content": [
+        {
+          "id": "status",
+          "element": "button",
+          "label": "TRANSLATE.PEPPY_ALSA_PIPE_SHOW_STATUS",
+          "onClick": {
+            "type": "plugin",
+            "endpoint": "audio_interface/peppy_alsa_pipe",
+            "method": "showStatus"
+          }
+        }
+      ]
+    },
+    {
+      "id": "section_mpd_conf",
+      "element": "section",
+      "label": "TRANSLATE.PEPPY_ALSA_PIPE_MPD_CONF",
+      "icon": "fa-cogs",
+      "onSave": {
+        "type": "controller",
+        "endpoint": "audio_interface/peppy_alsa_pipe",
+        "method": "configSaveMPDConfSettings"
+      },
+      "saveButton": {
+        "label": "TRANSLATE.PEPPY_ALSA_PIPE_SAVE",
+        "data": [
+          "modify"
+        ]
+      },
+      "content": [
+        {
+          "id": "modify",
+          "element": "select",
+          "label": "TRANSLATE.PEPPY_ALSA_PIPE_MODIFY",
+          "doc": "TRANSLATE.PEPPY_ALSA_PIPE_MPD_CONF_MODIFY_DESC",
+          "value": {
+            "value": "peppyBypass",
+            "label": "TRANSLATE.PEPPY_ALSA_PIPE_MODIFY_BYPASS"
+          },
+          "options": [
+            {
+              "value": "peppyBypass",
+              "label": "TRANSLATE.PEPPY_ALSA_PIPE_MODIFY_BYPASS"
+            },
+            {
+              "value": "none",
+              "label": "TRANSLATE.PEPPY_ALSA_PIPE_MODIFY_NONE"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
