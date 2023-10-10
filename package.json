@@ -1,0 +1,55 @@
+{
+  "name": "peppy_alsa_pipe",
+  "version": "0.1.0-dev",
+  "description": "Installs the Peppy ALSA Plugin for providing VU meter and spectrum analyzer data via named pipes.",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "rm -rf dist && npx tsc --build src && bash fixup.sh",
+    "build:uiconf": "node ./scripts/buildUIConfigSchema.js > ./src/lib/config/UIConfigSchema.ts",
+    "lint": "npx eslint ./src",
+    "lint:fix": "npx eslint ./src --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/patrickkfkan/volumio-peppy-alsa-pipe.git"
+  },
+  "author": "Patrick Kan",
+  "license": "GPL-3.0",
+  "volumio_info": {
+    "prettyName": "Peppy Alsa Pipe",
+    "plugin_type": "audio_interface",
+    "os": [
+      "buster"
+    ],
+    "icon": "fa-music",
+    "boot_priority": 10,
+    "details": "Installs the Peppy ALSA plugin for providing VU meter and spectrum analyzer data via named pipes.",
+    "changelog": "",
+    "architectures": [
+      "amd64",
+      "armhf"
+    ],
+    "has_alsa_contribution": true
+  },
+  "engines": {
+    "node": ">=14",
+    "volumio": ">=3"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^8.1.2",
+    "@types/md5": "^2.3.2",
+    "@types/node": "^14.18.38",
+    "@types/string-format": "^2.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@typescript-eslint/parser": "^5.56.0",
+    "eslint": "^8.36.0",
+    "typescript": "^4.9.5",
+    "winston": "^3.8.2"
+  },
+  "dependencies": {
+    "kew": "^0.7.0",
+    "string-format": "^2.0.0",
+    "v-conf": "^1.4.2",
+    "chokidar": "^3.5.3"
+  }
+}
