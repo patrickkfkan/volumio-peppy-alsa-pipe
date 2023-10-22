@@ -25,7 +25,9 @@ Pipeline with Peppy ALSA only works for PCM streams. If you throw a native DSD s
 
 Peppy Bypass creates a separate pipeline that does not incorporate Peppy ALSA. The entry point into this pipeline is the `volumioNoPeppy` ALSA device. Players that fail to play with the default `volumio` ALSA device can try with `volumioNoPeppy` instead. The obvious downside is that, without special facilitation, playback through these players will lack visualizer data from Peppy ALSA.
 
-> Peppy Bypass is not available when the FusionDSP plugin is enabled. This is because FusionDSP processes audio and outputs PCM streams in the end.
+>**FusionDSP**
+>
+>Peppy Bypass is not available when the FusionDSP plugin is enabled. This is because FusionDSP processes audio and outputs PCM streams in the end. ***Tip***: if you encounter playback issues such as MPD hanging, try enabling **Resampling** in FusionDSP settings.
 
 ### Peppy Only
 
