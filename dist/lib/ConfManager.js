@@ -145,6 +145,7 @@ _ConfManager_playerConfChangeDelayTimer = new WeakMap(), _ConfManager_peppyBypas
         return null;
     }));
     let outPCM = PEPPY_BYPASS_ALSA_DEVICE;
+    let hasSoftVolume = false;
     const confParts = [];
     for (const snippet of snippets) {
         if (snippet) {
@@ -154,17 +155,29 @@ _ConfManager_playerConfChangeDelayTimer = new WeakMap(), _ConfManager_peppyBypas
             slave.pcm "${snippet.inPCM}"
           }
 
-          ${snippet.contents}
         `);
+            /**
+             * Break if we encounter 'softvolume'. This should be the last
+             * PCM in the pipeline before 'volumioOutput'. Volumio creates
+             * 'SoftMaster' control under 'softvolume' and uses it for software
+             * volume - we need to preserve this.
+             */
+            if (snippet.inPCM === 'softvolume') {
+                hasSoftVolume = true;
+                break;
+            }
+            confParts.push(snippet.contents);
             outPCM = snippet.outPCM;
         }
     }
-    confParts.push(`
-      pcm.${outPCM} {
-        type empty
-        slave.pcm "volumioOutput"
-      }
-    `);
+    if (!hasSoftVolume) {
+        confParts.push(`
+        pcm.${outPCM} {
+          type empty
+          slave.pcm "volumioOutput"
+        }
+      `);
+    }
     // ALSA ctl - for players like Squeezelite which requires it for Hardware mixer
     const outputDevice = alsaController.getConfigParam('outputdevice');
     const card = outputDevice.indexOf(',') >= 0 ? outputDevice.charAt(0) : outputDevice;
@@ -185,6 +198,9 @@ _ConfManager_playerConfChangeDelayTimer = new WeakMap(), _ConfManager_peppyBypas
     noPeppyConf = noPeppyConf
         .replace(pcmNameRegex, '$1.$2_noPeppy {')
         .replace(`${PEPPY_BYPASS_ALSA_DEVICE}_noPeppy`, PEPPY_BYPASS_ALSA_DEVICE);
+    if (hasSoftVolume) {
+        noPeppyConf = noPeppyConf.replace('softvolume_noPeppy', 'softvolume');
+    }
     // Modify slave references
     const slaveNameRegex = /(pcm|slave)(?!\.) +(.+)/;
     const modifiedConfLines = [];
@@ -194,6 +210,7 @@ _ConfManager_playerConfChangeDelayTimer = new WeakMap(), _ConfManager_peppyBypas
             slaveName = slaveName.substring(1, slaveName.length - 1);
         }
         if (slaveName && slaveName !== PEPPY_BYPASS_ALSA_DEVICE &&
+            slaveName !== 'softvolume' &&
             slaveName !== 'volumioOutput' && pcmNames.indexOf(slaveName) >= 0) {
             modifiedConfLines.push(line.replace(slaveNameRegex, `$1 "${slaveName}_noPeppy"`));
         }

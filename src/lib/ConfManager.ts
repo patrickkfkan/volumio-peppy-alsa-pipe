@@ -166,6 +166,7 @@ export default class ConfManager {
     }));
 
     let outPCM = PEPPY_BYPASS_ALSA_DEVICE;
+    let hasSoftVolume = false;
     const confParts: string[] = [];
     for (const snippet of snippets) {
       if (snippet) {
@@ -175,18 +176,32 @@ export default class ConfManager {
             slave.pcm "${snippet.inPCM}"
           }
 
-          ${snippet.contents}
         `);
+
+        /**
+         * Break if we encounter 'softvolume'. This should be the last
+         * PCM in the pipeline before 'volumioOutput'. Volumio creates
+         * 'SoftMaster' control under 'softvolume' and uses it for software
+         * volume - we need to preserve this.
+         */
+        if (snippet.inPCM === 'softvolume') {
+          hasSoftVolume = true;
+          break;
+        }
+
+        confParts.push(snippet.contents);
 
         outPCM = snippet.outPCM;
       }
     }
-    confParts.push(`
-      pcm.${outPCM} {
-        type empty
-        slave.pcm "volumioOutput"
-      }
-    `);
+    if (!hasSoftVolume) {
+      confParts.push(`
+        pcm.${outPCM} {
+          type empty
+          slave.pcm "volumioOutput"
+        }
+      `);
+    }
 
     // ALSA ctl - for players like Squeezelite which requires it for Hardware mixer
     const outputDevice = alsaController.getConfigParam('outputdevice');
@@ -211,6 +226,10 @@ export default class ConfManager {
       .replace(pcmNameRegex, '$1.$2_noPeppy {')
       .replace(`${PEPPY_BYPASS_ALSA_DEVICE}_noPeppy`, PEPPY_BYPASS_ALSA_DEVICE);
 
+    if (hasSoftVolume) {
+      noPeppyConf = noPeppyConf.replace('softvolume_noPeppy', 'softvolume');
+    }
+
     // Modify slave references
     const slaveNameRegex = /(pcm|slave)(?!\.) +(.+)/;
     const modifiedConfLines: string[] = [];
@@ -220,6 +239,7 @@ export default class ConfManager {
         slaveName = slaveName.substring(1, slaveName.length - 1);
       }
       if (slaveName && slaveName !== PEPPY_BYPASS_ALSA_DEVICE &&
+        slaveName !== 'softvolume' &&
         slaveName !== 'volumioOutput' && pcmNames.indexOf(slaveName) >= 0) {
 
         modifiedConfLines.push(line.replace(slaveNameRegex, `$1 "${slaveName}_noPeppy"`));
